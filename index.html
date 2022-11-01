@@ -1,0 +1,94 @@
+<html lang="ja">
+<head>
+<title>n^2-1パズル</title>
+<meta name="viewport" content="width=device-width">
+<meta name="twitter:card" content="summary">
+<style>
+table { border-spacing: 0; cursor: default; }
+td { font-size: 2rem; text-align: right; }
+td:hover { color: white; background-color: black; }
+table, td { border: solid; }
+</style>
+</head>
+<body>
+<h1>n^2-1 pazzle</h1>
+<div><button>-</button><output>size 3</output><button>+</button></div>
+<p>0 move times</p>
+<table></table>
+<p>Click cell besides blank!</p>
+<script>
+let size = 3;
+let count = 0;
+let pieces = [];
+const table = document.querySelector("table");
+const p = document.querySelector("p");
+const output = document.querySelector("output");
+const [mButton, pButton] = document.querySelectorAll("button");
+const xy2d = (x, y) => y*size + x;
+const d2xy = (d) => ({x: d%size, y: Math.floor(d/size)});
+
+const show = () => {
+    for(let y=0; y<size; y+=1) for(let x=0; x<size; x+=1) table.children[y].children[x].textContent = pieces[xy2d(x, y)] ?? " ";
+}
+
+const check = () => {
+    if(pieces[pieces.length-1]) return;
+    for(let i=0; i<pieces.length-2; i+=1) if(pieces[i]>pieces[i+1]) return;
+    alert(`complete!(move${count} times)`);
+}
+
+const change = (x, y) => {
+    const target = [{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
+    for(let i=0; i<4; i+=1){
+        const tx = x + target[i].x;
+        const ty = y + target[i].y;
+        if(tx<0 || size<=tx) continue;
+        if(ty<0 || size<=ty) continue;
+        const td = xy2d(tx, ty);
+        if(pieces[td]) continue;
+        const d = xy2d(x, y);
+        [pieces[d], pieces[td]] = [pieces[td], pieces[d]];
+        count += 1;
+        p.textContent = `${count} move times`;
+        show();
+        check();
+        break;
+    }
+}
+
+const init = () => {
+    table.textContent = "";
+    for(let y=0; y<size; y+=1){
+        const tr = document.createElement("tr");
+        for(let x=0; x<size; x+=1){
+            const td = document.createElement("td");
+            td.addEventListener("click", () => change(x, y));
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+    }
+    pieces = [...(new Array(size**2-1).fill().map((e, i) => i+1)), null].sort((a, b) => Math.random()-0.5);
+    show();
+}
+
+mButton.addEventListener("click", () => {
+    if(size <= 2) return;
+    size -= 1;
+    count = 0;
+    p.textContent = "0 move times";
+    output.textContent = `size ${size}`;
+    init();
+})
+
+pButton.addEventListener("click", () => {
+    size += 1;
+    count = 0;
+    p.textContent = "0 move times";
+    output.textContent = `size ${size}`;
+    init();
+})
+
+init();
+</script>
+</body>
+</html>
